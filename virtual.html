@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GEO-Park WebGIS</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f4e9;--card:#fffefa;--ink:#1a3d2e;--mut:#667a6e;--g:#2f6b4a;--o:#f59e0b;--bd:#e3e0d2;--hd:#1a3d2e;--hi:#d6e9a8;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1f18;--card:#16291f;--ink:#e8f1d8;--mut:#9db3a3;--bd:#27402f;--hd:#0a1812;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1f18;--card:#16291f;--ink:#e8f1d8;--mut:#9db3a3;--bd:#27402f;--hd:#0a1812;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 'Plus Jakarta Sans',system-ui,sans-serif;display:flex;flex-direction:column}
+header{background:var(--hd);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.logo b{font-size:20px;font-weight:800;letter-spacing:-.3px}.logo b i{color:var(--o);font-style:normal}
+.logo small{display:block;color:var(--hi);font-size:11px;margin-top:-2px}
+.parks{display:flex;gap:6px;margin-left:auto}
+.parks button{border:1.5px solid #ffffff40;background:transparent;color:#fff;padding:7px 13px;border-radius:99px;font:600 13px inherit;cursor:pointer}
+.parks button.on{background:var(--pc);border-color:var(--pc)}
+main{flex:1;min-height:0;display:grid;grid-template-columns:370px 1fr}
+aside{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--bd);background:var(--bg)}
+.tabs{display:flex;padding:10px 12px 0;gap:4px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--mut);padding:9px 2px;font:700 12px inherit;border-bottom:3px solid transparent;cursor:pointer}
+.tabs button.on{color:var(--ink);border-color:var(--o)}
+.pane{flex:1;overflow:auto;padding:12px}
+input[type=search]{width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--ink);padding:5px 10px;border-radius:99px;font:600 12px inherit;cursor:pointer}
+.chip.on{background:var(--g);color:#fff;border-color:var(--g)}
+.item{display:flex;gap:11px;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;margin-bottom:8px;cursor:pointer;border-left:5px solid var(--c)}
+.item:hover{transform:translateX(2px)}
+.em{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:20px;background:var(--c);flex:none}
+.item b{display:block}.item span{color:var(--mut);font-size:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:10px}
+.btn{border:0;background:var(--g);color:#fff;padding:10px 14px;border-radius:11px;font:700 13px inherit;cursor:pointer;margin:4px 4px 0 0}
+.btn.o{background:var(--o);color:#2b1b00}.btn.l{background:transparent;color:var(--ink);border:1px solid var(--bd)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.tag{display:inline-block;background:var(--bd);padding:3px 9px;border-radius:99px;font-size:12px;margin:2px 3px 2px 0}
+.mut{color:var(--mut)}
+.pano{height:110px;border-radius:12px;overflow:hidden;background:linear-gradient(#9fd3ee,#d9f0c4 70%,#7bb36a);position:relative;margin:8px 0}
+.pano div{position:absolute;bottom:6px;white-space:nowrap;font-size:38px;transition:transform .1s}
+input[type=range]{width:100%;accent-color:var(--o)}
+.pts{background:linear-gradient(135deg,#1a3d2e,#2f6b4a);color:#fff;border-radius:18px;padding:16px;margin-bottom:12px}
+.pts big{font-size:38px;font-weight:800;color:var(--o);line-height:1}
+.bar{height:8px;border-radius:9px;background:#ffffff30;margin-top:10px;overflow:hidden}.bar i{display:block;height:100%;background:var(--o)}
+.ms{border-left:5px solid var(--c)}.ms.done{opacity:.6}
+#mw{position:relative;min-height:0;background:#cfe6b8;overflow:hidden}
+svg#m{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.mk{cursor:pointer}.lb{font:700 11px 'Plus Jakarta Sans',sans-serif;fill:#173326;paint-order:stroke;stroke:#fffdf0;stroke-width:3.5px;text-anchor:middle}
+.ctl{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:6px}
+.ctl button{width:40px;height:40px;border-radius:11px;border:0;background:var(--card);color:var(--ink);font:800 18px inherit;cursor:pointer;box-shadow:0 2px 8px #0003}
+.ctl button.on{background:#2b7de9;color:#fff}
+.hint{position:absolute;left:12px;top:12px;background:#fffefae6;color:#173326;padding:7px 12px;border-radius:99px;font-weight:600;font-size:12px;box-shadow:0 2px 8px #0002}
+.legend{position:absolute;left:12px;bottom:12px;background:#fffefae6;color:#173326;border-radius:12px;padding:7px 10px;font-size:11px;font-weight:600;display:flex;gap:9px;flex-wrap:wrap;max-width:calc(100% - 24px)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);background:#1a3d2e;color:#fff;padding:11px 18px;border-radius:12px;font-weight:600;opacity:0;transition:.25s;z-index:9;max-width:90%;text-align:center}
+#toast.s{opacity:1;transform:translate(-50%,0)}
+@keyframes pu{0%{r:14;opacity:.7}100%{r:34;opacity:0}}.pl{animation:pu 1.6s infinite}.fl{animation:fl 3s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-6px)}}
+@media(max-width:820px){main{grid-template-columns:1fr;grid-template-rows:46% 1fr}#mw{order:-1}aside{border:0}.parks{margin-left:0;width:100%}.parks button{flex:1;padding:7px 4px}}
+</style></head><body>
+<header>
+<div class="logo"><svg width="38" height="44" viewBox="0 0 38 44"><path d="M19 2C9 2 2 9 2 18c0 11 17 24 17 24s17-13 17-24C36 9 29 2 19 2z" fill="#2f6b4a" stroke="#f59e0b" stroke-width="2.5"/><circle cx="19" cy="18" r="9" fill="#f7f4e9"/><path d="M13 22l4-8 8-3-3 8z" fill="#f59e0b"/></svg>
+<div><b>GEO<i>-Park</i></b><small>Jelajah. Temukan. Nikmati.</small></div></div>
+<div class="parks" id="parks"></div></header>
+<main>
+<aside><div class="tabs" id="tabs"></div><div class="pane" id="pane"></div></aside>
+<section id="mw"><svg id="m" xmlns="http://www.w3.org/2000/svg"></svg>
+<div class="hint" id="hint">Geser &amp; zoom peta · ketuk titik untuk detail</div>
+<div class="ctl"><button id="zi" title="Zoom in">+</button><button id="zo" title="Zoom out">−</button><button id="loc" title="Lokasi saya">📍</button><button id="sty" title="Gaya peta: ilustrasi / satelit">🛰️</button><button id="rs" title="Reset tampilan">⟲</button></div>
+<div class="legend" id="lg"></div></section></main>
+<div id="toast"></div>
+<script>
+const C={sat:['Satwa','🐘','#3f9a63'],edu:['Edukasi','🔬','#3b8f9a'],wah:['Wahana','🎢','#e8a23a'],kul:['Kuliner','🍜','#d9694f'],fas:['Fasilitas','🚻','#6b7fa8'],rwd:['Reward','🎁','#b8429a']};
+const PK={1:['Jatim Park 1','#2f6b4a'],2:['Jatim Park 2','#e8821a'],3:['Jatim Park 3','#3b8f9a']};
+// data contoh (perlu divalidasi lewat survei lapangan): [taman,nama,kategori,x,y,deskripsi,fasilitas]
+const D=[
+[1,'Pintu Masuk JP1','fas',500,590,'Gerbang utama, loket, dan pusat informasi.','Tiket · Informasi · Toilet'],
+[1,'Volcano & Galeri Nusantara','edu',300,200,'Area edukasi gunung berapi, tanaman agro, diorama satwa langka, dan miniatur candi.','Ramah anak · Ramah rombongan sekolah'],
+[1,'Spinning Coaster','wah',720,180,'Wahana ekstrem untuk pengunjung yang suka tantangan.','Batas tinggi berlaku · Area tunggu'],
+[1,'Kolam Renang Raksasa','wah',760,380,'Kolam besar dengan latar patung Ken Dedes, Ken Arok, dan Mpu Gandring.','Loker · Ruang bilas'],
+[1,'Museum Tubuh Bagong Adventure','edu',200,350,'Museum tubuh manusia interaktif untuk belajar sains.','Jalur ramah kursi roda'],
+[1,'Food Court','kul',520,400,'Pilihan makanan dan minuman untuk rombongan.','Area makan luas · Mushola dekat'],
+[1,'Toilet & Mushola','fas',330,450,'Fasilitas ibadah dan sanitasi.','Toilet · Mushola · Ruang menyusui'],
+[1,'Reward Center JP1','rwd',480,510,'Tukarkan poin GEO-Quest dengan merchandise.','Petugas verifikasi · Katalog hadiah'],
+[2,'Pintu Masuk JP2','fas',520,595,'Gerbang utama, loket, dan informasi.','Tiket · Informasi · Parkir'],
+[2,'Batu Secret Zoo','sat',250,200,'Kebun binatang dengan beragam satwa untuk diamati.','Jalur ramah kursi roda · Toilet'],
+[2,'Museum Satwa','edu',520,150,'Koleksi edukasi tentang satwa dan habitatnya.','AC · Panel edukasi'],
+[2,'River Adventure','wah',780,240,'Wahana petualangan air di Jatim Park 2.','Batas tinggi berlaku · Loker'],
+[2,'Reptile Garden','sat',300,410,'Zona reptil di Batu Secret Zoo, diamati dari area pengunjung.','Papan informasi · Area duduk'],
+[2,'Resto Savana','kul',560,380,'Restoran bertema savana.','Menu keluarga · Area makan'],
+[2,'Toilet Tengah','fas',720,470,'Toilet dan ruang istirahat.','Toilet · Ruang menyusui'],
+[2,'Reward Center JP2','rwd',480,530,'Penukaran poin dan merchandise.','Petugas verifikasi'],
+[3,'Pintu Masuk JP3','fas',500,595,'Gerbang utama dan pusat informasi.','Tiket · Informasi · Parkir'],
+[3,'Dino Park','edu',260,210,'Replika dinosaurus dan edukasi purba.','Spot foto · Papan edukasi'],
+[3,'The Legend Stars','wah',740,200,'Taman wahana tematik di Jatim Park 3.','Batas tinggi berlaku'],
+[3,'Fun Tech Plaza','edu',500,150,'Area bermain sains dan teknologi untuk anak.','Jalur teduh · Area belajar'],
+[3,'Ice Age Park','sat',320,420,'Miniatur ekosistem zaman es, diamati dari area pengunjung.','Ramah anak · Papan etika satwa'],
+[3,'Food Court JP3','kul',600,400,'Kuliner dan jajanan khas.','Area makan luas'],
+[3,'Toilet & Mushola JP3','fas',740,470,'Fasilitas ibadah dan sanitasi.','Toilet · Mushola'],
+[3,'Reward Center JP3','rwd',480,515,'Penukaran poin dan merchandise.','Petugas verifikasi']];
+const Q={sat:['Dari mana pengunjung boleh mengamati satwa di GEO-Park?',['Dari area pengunjung','Dengan masuk ke kandang','Sambil memberi makan satwa']],
+edu:['GEO-Park termasuk jenis aplikasi apa?',['WebGIS: peta interaktif berbasis web','Aplikasi kasir offline','Game konsol']],
+con:['Sikap yang benar terhadap satwa di taman?',['Tidak menyentuh dan tidak memberi makan','Mengajak satwa berfoto dari dekat','Memakai lampu kilat ke arah satwa']]};
+const PT={sat:50,edu:30},RW=[[100,'Stiker GEO-Park','🏷️'],[200,'Gantungan kunci','🔑'],[350,'Pin eksklusif','📍'],[500,'Tote bag','👜'],[750,'Merchandise spesial','🎁']];
+let S={pts:0,sc:[],adv:0,con:0,red:[]};try{S=Object.assign(S,JSON.parse(localStorage.getItem('gp')||'{}'))}catch(e){}
+const sv=()=>{try{localStorage.setItem('gp',JSON.stringify(S))}catch(e){}};
+let park=1,cat=null,q='',sel=null,me=null,placing=false,tab='x',vb,K=.64,rt=null,heat=false;
+const G={},D0=D.map(d=>[d[3],d[4]]);
+function proj(){[1,2,3].forEach(p=>{const L=D.map((d,i)=>i).filter(i=>D[i][0]==p&&G[i]);if(!L.length)return;const la=L.reduce((s,i)=>s+G[i][0],0)/L.length,lo=L.reduce((s,i)=>s+G[i][1],0)/L.length,k=111320;L.forEach(i=>{D[i][3]=Math.round(500+(G[i][1]-lo)*k*Math.cos(la*Math.PI/180)*2);D[i][4]=Math.round(320-(G[i][0]-la)*k*2)})})}
+function saveG(){try{localStorage.setItem('gpg',JSON.stringify(G))}catch(e){}}
+function loadG(){try{Object.assign(G,JSON.parse(localStorage.getItem('gpg')||'{}'))}catch(e){}proj()}
+function impG(t){let n=0;t.split('\n').forEach(l=>{const m=l.split('|');if(m.length<2)return;const nm=m[0].trim().toLowerCase(),c=m[1].match(/-?\d+(?:[.,]\d+)?/g);if(!nm||!c||c.length<2)return;const la=+c[0].replace(',','.'),lo=+c[1].replace(',','.');let i=D.findIndex(d=>d[1].toLowerCase()==nm);if(i<0)i=D.findIndex(d=>d[0]==park&&(d[1].toLowerCase().includes(nm)||nm.includes(d[1].toLowerCase())));if(i<0||Math.abs(la)>90||Math.abs(lo)>180)return;G[i]=[la,lo];n++});saveG();proj();return n}
+const PI={1:['Jl. Kartika No.2, Sisir, Kec. Batu','-7.88412, 112.52491','https://www.google.com/maps/search/?api=1&query=-7.88412,112.52491'],2:['Jl. Raya Oro-Oro Ombo No.9, Temas, Kec. Batu','-7.888005, 112.529566','https://www.google.com/maps/search/?api=1&query=-7.888005,112.529566'],3:['Jl. Ir. Soekarno No.144, Beji, Kec. Junrejo','belum terverifikasi dari sumber','https://www.google.com/maps/search/?api=1&query=Jatim+Park+3+Batu']};
+function parkInfo(){const x=PI[park];return`<div class="card"><b>📍 Lokasi nyata ${PK[park][0]}</b><br><span class="mut">${x[0]}, Kota Batu</span><br>Koordinat: <b>${x[1]}</b><br><a href="${x[2]}" target="_blank" rel="noopener" class="btn o" style="display:inline-block;text-decoration:none">Buka di Google Maps ↗</a><details style="margin-top:10px"><summary><b>Impor koordinat asli</b></summary><p class="mut" style="font-size:12px">Satu baris per titik: <code>Nama wahana | lat, lon</code>. Jarak dan rute otomatis memakai meter nyata.</p><textarea id="imp" rows="5" style="width:100%;padding:8px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--ink);font:12px monospace" placeholder="Batu Secret Zoo | -7.8880, 112.5295"></textarea><button class="btn" data-imp="1">Terapkan</button><button class="btn l" data-gr="1">Reset</button></details></div>`}
+const P=i=>[D[i][3],D[i][4]],EN=()=>idx().find(i=>D[i][1].startsWith('Pintu'));
+function pop(i){const r=rnd(i*31+7);return Math.round(20+r()*180)+S.sc.filter(x=>x==i).length*15}
+function routeStart(i){const L=idx().filter(x=>x!=i);if(me)return L.sort((a,b)=>dist(me,P(a))-dist(me,P(b)))[0];const e=EN();return e!=i?e:null}
+function routeInfo(){const[a,b]=rt,e=EN(),n=a==e?[e,b]:b==e?[a,e]:[a,e,b],s0=P(n[0]);let d=me?`M${me[0]} ${me[1]}L${s0[0]} ${s0[1]}`:`M${s0[0]} ${s0[1]}`,m=me?dist(me,s0):0;for(let k=1;k<n.length;k++){const u=P(n[k-1]),v=P(n[k]);d+=`Q${(u[0]+v[0])/2+30} ${(u[1]+v[1])/2-30} ${v[0]} ${v[1]}`;m+=dist(u,v)*1.1}return{d,m:Math.round(m)}}
+function dash(){const L=idx().filter(i=>['sat','edu','wah','kul'].includes(D[i][2])),V=L.map(i=>[i,pop(i)]).sort((a,b)=>b[1]-a[1]),mx=V[0][1],tot=V.reduce((s,v)=>s+v[1],0),bc={};V.forEach(v=>{const k=D[v[0]][2];bc[k]=(bc[k]||0)+v[1]});
+const row=(k,t,n,m)=>`<div style="margin:9px 0"><div style="display:flex;justify-content:space-between"><span>${C[k][1]} ${t}</span><b>${n}</b></div><div class="bar" style="background:var(--bd)"><i style="width:${n/m*100}%;background:${C[k][2]}"></i></div></div>`;
+const bm=Math.max(...Object.values(bc));
+return`<div class="pts"><span style="opacity:.8">Insight ${PK[park][0]} · hari ini (simulasi)</span><br><big>${tot}</big> <b>kunjungan titik</b><br><small>${Math.round(tot*.62)} misi selesai · ${Math.round(tot*.11)} hadiah ditukar</small></div><button class="btn ${heat?'o':''}" data-heat="1">🔥 Heatmap di peta: ${heat?'ON':'OFF'}</button><div class="card" style="margin-top:10px"><b>Titik paling diminati</b>${V.slice(0,6).map(v=>row(D[v[0]][2],D[v[0]][1],v[1],mx)).join('')}</div><div class="card"><b>Minat per kategori</b>${Object.keys(bc).map(k=>row(k,C[k][0],bc[k],bm)).join('')}</div><p class="mut" style="font-size:11px">Data agregat ini simulasi untuk menggambarkan fitur “Insight untuk pengelola”. Data nyata berasal dari klaim misi pengguna.</p>`}
+
+const $=id=>document.getElementById(id),svg=$('m');
+const idx=()=>D.map((d,i)=>i).filter(i=>D[i][0]==park);
+function toast(t){const e=$('toast');e.textContent=t;e.className='s';clearTimeout(toast.t);toast.t=setTimeout(()=>e.className='',2600)}
+function rnd(s){return()=>(s=(s*16807)%2147483647)/2147483647}
+function fit(){const r=svg.getBoundingClientRect();if(!r.width)return;K=r.height/r.width;let sc=Math.max(1000/r.width,640/r.height);const w=r.width*sc,h=r.height*sc;vb={x:500-w/2,y:320-h/2,w,h};ap()}
+function ap(){vb.h=vb.w*K;svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`)}
+function zoom(f,cx,cy){const nw=Math.min(2400,Math.max(260,vb.w*f));f=nw/vb.w;cx=cx??vb.x+vb.w/2;cy=cy??vb.y+vb.h/2;vb.x=cx-(cx-vb.x)*f;vb.y=cy-(cy-vb.y)*f;vb.w=nw;ap()}
+function pt(e){const r=svg.getBoundingClientRect();return[vb.x+(e.clientX-r.left)/r.width*vb.w,vb.y+(e.clientY-r.top)/r.height*vb.h]}
+function dist(a,b){return Math.round(Math.hypot(a[0]-b[0],a[1]-b[1])*.5)}
+function nearest(){if(!me)return[];return idx().filter(i=>D[i][2]!='fas'||true).map(i=>[i,dist(me,[D[i][3],D[i][4]])]).sort((a,b)=>a[1]-b[1]).slice(0,3)}
+let sty=2;
+const PAL=[{bg0:'#d6ecb8',bg1:'#a9d18c',tr:'#4f9a5a',lk:'#8fd0e6',bd:'#fffefa',bs:'#c9bfa0',rd:'#8f98a3',zn:'#c4e5a4'},{bg0:'#4a5d3a',bg1:'#2f3f27',tr:'#1d3a1f',lk:'#2c5f73',bd:'#c9c3b4',bs:'#7a7466',rd:'#575b5e',zn:'#55703f'},{bg0:'#3d6f58',bg1:'#2c5744',tr:'#2f6b4a',lk:'#8fd0e6',bd:'#fffefa',bs:'#c9bfa0',rd:'#f3e7c0',zn:'#5da36d'}];
+const RN={1:'Jl. Kartika',2:'Jl. Raya Oro-Oro Ombo',3:'Jl. Ir. Soekarno'};
+const EMJ=(n,c)=>/dino/i.test(n)?'🦖':/secret zoo/i.test(n)?'🐘':/museum satwa/i.test(n)?'🦴':/reptile/i.test(n)?'🐊':/ice age/i.test(n)?'🦣':/coaster/i.test(n)?'🎢':/legend/i.test(n)?'🎡':/river/i.test(n)?'🛶':/kolam/i.test(n)?'🏊':/volcano/i.test(n)?'🌋':/tubuh/i.test(n)?'🧬':/fun tech/i.test(n)?'🤖':C[c][1];
+const cloud=(x,y,k,col)=>`<g transform="translate(${x} ${y}) scale(${k})" opacity=".93" pointer-events="none"><ellipse cx="6" cy="16" rx="72" ry="14" fill="#0003"/><circle cx="-30" cy="0" r="22" fill="${col}"/><circle cx="0" cy="-10" r="28" fill="${col}"/><circle cx="32" cy="0" r="22" fill="${col}"/><rect x="-52" y="0" width="104" height="20" rx="10" fill="${col}"/></g>`;
+function game(r,en){const rv='M-60 220C140 180 220 330 420 290C600 250 640 420 820 400C920 390 1000 450 1100 520';
+let s=`<path d="M70 120C60 40 230 10 380 30C560 -5 800 20 900 90C990 160 960 380 930 470C900 590 760 650 560 640C380 655 150 640 90 540C30 450 80 240 70 120Z" fill="#5da36d" stroke="#a8d8a0" stroke-width="8"/><path d="${rv}" fill="none" stroke="#7cc4e0" stroke-width="30" stroke-linecap="round"/><path d="${rv}" fill="none" stroke="#cdeefa" stroke-width="6" stroke-dasharray="3 18" stroke-linecap="round"/>`;
+for(let i=0;i<70;i++){const x=90+r()*820|0,y=50+r()*570|0;s+=`<path d="M${x} ${y-12}l9 20h-18z" fill="#2f6b4a" opacity="${.5+r()*.4}"/>`}
+s+=`<text x="84" y="100" font-size="46" font-weight="800" fill="#fffefa" opacity=".92">${PK[park][0]}</text><text x="86" y="126" font-size="16" fill="#d6e9a8">Jelajah. Temukan. Nikmati.</text>`;
+idx().forEach(i=>{const d=D[i],c=C[d[2]];if(i==en)return;s+=`<g transform="translate(${d[3]} ${d[4]-46})" pointer-events="none"><g class="fl"><ellipse cy="36" rx="22" ry="6" fill="#0004"/><circle r="30" fill="#fffefa" stroke="${c[2]}" stroke-width="4"/><text y="13" text-anchor="middle" font-size="34">${EMJ(d[1],d[2])}</text></g></g>`});
+s+=`<g transform="translate(${D[en][3]} ${D[en][4]-40})" pointer-events="none"><circle r="28" fill="#fffefa" stroke="#d9a23a" stroke-width="4"/><text y="12" text-anchor="middle" font-size="32">🎪</text></g>`;
+return s+cloud(120,70,1.3,'#fffefa')+cloud(880,110,1.1,'#f6c9d0')+cloud(150,610,1.2,'#f6c9d0')+cloud(910,600,1,'#fffefa')}
+function scene(r,en){if(sty==2)return game(r,en);const p=PAL[sty];let s=`<rect x="-2500" y="665" width="6000" height="120" fill="${p.rd}"/><rect x="-2500" y="722" width="6000" height="4" fill="#f5d44b" opacity=".8"/><text x="140" y="700" font-size="17" font-weight="700" fill="#fff" opacity=".95">${RN[park]}</text>`;
+s+=`<rect x="40" y="30" width="920" height="610" rx="40" fill="${p.zn}" opacity=".55" stroke="#fff" stroke-width="4" stroke-dasharray="14 10"/>`;
+s+=`<rect x="330" y="620" width="340" height="38" rx="6" fill="${p.rd}"/>`+[...Array(14)].map((_,k)=>`<rect x="${342+k*23}" y="626" width="2" height="26" fill="#fff" opacity=".7"/>`).join('');
+s+=`<ellipse cx="${400+park*60}" cy="300" rx="120" ry="55" fill="${p.lk}" stroke="#fff" stroke-width="5" opacity=".9"/>`;
+for(let i=0;i<110;i++){const x=r()*1000,y=r()*640;s+=`<circle cx="${x|0}" cy="${y|0}" r="${7+r()*10|0}" fill="${p.tr}" opacity="${.35+r()*.3}"/>`}
+idx().forEach(i=>{const d=D[i],c=C[d[2]];if(i==en)return;const w=74+(i*37%40),h=46+(i*23%28),x=d[3]-w/2,y=d[4]-h/2;s+=`<rect x="${x-6}" y="${y-6}" width="${w+12}" height="${h+12}" rx="18" fill="${c[2]}" opacity=".3"/><rect x="${x+5}" y="${y+7}" width="${w}" height="${h}" rx="8" fill="#000" opacity=".2"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="${p.bd}" stroke="${p.bs}" stroke-width="2"/><rect x="${x+6}" y="${y+6}" width="${w-12}" height="8" rx="3" fill="${c[2]}" opacity=".85"/>`});
+s+=`<rect x="${D[en][3]-42}" y="${D[en][4]-14}" width="84" height="28" rx="6" fill="${p.bd}" stroke="#d9a23a" stroke-width="3"/>`;return s}
+function draw(){
+const r=rnd(park*97+13),en=idx().find(i=>D[i][1].startsWith('Pintu')),[ex,ey]=[D[en][3],D[en][4]],pc=PK[park][1];
+let s=`<defs><radialGradient id="bg" cx="50%" cy="45%" r="75%"><stop offset="0" stop-color="${PAL[sty].bg0}"/><stop offset="1" stop-color="${PAL[sty].bg1}"/></radialGradient></defs><rect x="-2500" y="-2500" width="6000" height="6000" fill="url(#bg)"/>`;
+s+=scene(r,en);
+
+idx().forEach(i=>{const d=D[i];if(i==en)return;s+=`<path d="M${ex} ${ey}Q${(ex+d[3])/2+30} ${(ey+d[4])/2-30} ${d[3]} ${d[4]}" fill="none" stroke="#f1e6bf" stroke-width="12" stroke-linecap="round"/><path d="M${ex} ${ey}Q${(ex+d[3])/2+30} ${(ey+d[4])/2-30} ${d[3]} ${d[4]}" fill="none" stroke="#d9c58c" stroke-width="2" stroke-dasharray="4 8"/>`});
+if(heat)idx().forEach(i=>{s+=`<circle cx="${D[i][3]}" cy="${D[i][4]}" r="${20+pop(i)/3.2}" fill="#ff4d1a" opacity=".28"/>`});if(rt){const ri=routeInfo();s+=`<path d="${ri.d}" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/><path d="${ri.d}" fill="none" stroke="#2b7de9" stroke-width="6" stroke-linecap="round" stroke-dasharray="1 12"/>`}const nr=nearest();if(me&&nr[0]){const d=D[nr[0][0]];s+=`<line x1="${me[0]}" y1="${me[1]}" x2="${d[3]}" y2="${d[4]}" stroke="#2b7de9" stroke-width="4" stroke-dasharray="9 8"/>`}
+idx().forEach(i=>{const d=D[i],c=C[d[2]];if(cat&&d[2]!=cat)return;if(q&&!d[1].toLowerCase().includes(q))return;const on=sel==i;
+s+=`<g class="mk" data-i="${i}" transform="translate(${d[3]},${d[4]})">${on||sty==2&&!S.sc.includes(i)?`<circle class="pl" r="14" fill="${c[2]}"/>`:''}<circle r="${on?22:17}" fill="${c[2]}" stroke="#fff" stroke-width="3.5"/><text y="${on?8:6}" text-anchor="middle" font-size="${on?22:17}">${c[1]}</text>${S.sc.includes(i)?'<circle cx="13" cy="-13" r="8" fill="#22a05a" stroke="#fff" stroke-width="2"/><text x="13" y="-9" text-anchor="middle" font-size="11" fill="#fff" font-weight="800">✓</text>':''}<text class="lb" y="${on?40:33}">${d[1]}</text></g>`});
+if(sty==2){const a=me||P(EN());s+=`<g transform="translate(${a[0]},${a[1]})" pointer-events="none"><ellipse cy="18" rx="18" ry="7" fill="#0006"/><circle class="pl" r="14" fill="#2b7de9"/><text y="12" text-anchor="middle" font-size="34">🧑‍🎒</text></g>`}else if(me)s+=`<g transform="translate(${me[0]},${me[1]})"><circle class="pl" r="14" fill="#2b7de9"/><circle r="9" fill="#2b7de9" stroke="#fff" stroke-width="3.5"/></g>`;
+svg.innerHTML=s}
+function fly(i){const d=D[i];if(vb.w>620)zoom(620/vb.w);vb.x=d[3]-vb.w/2;vb.y=d[4]-vb.h/2;ap()}
+function sel_(i,f){sel=i;tab='x';f&&fly(i);all()}
+function parks(){$('parks').innerHTML=Object.keys(PK).map(k=>`<button class="${k==park?'on':''}" style="--pc:${PK[k][1]}" data-p="${k}">${PK[k][0]}</button>`).join('');
+$('lg').innerHTML=Object.keys(C).map(k=>`<span>${C[k][1]} ${C[k][0]}</span>`).join('')}
+function tabs(){$('tabs').innerHTML=[['x','🗺️ Jelajah'],['q','🏆 Quest'],['r','🎁 Reward'],['d','📊 Insight']].map(t=>`<button class="${tab==t[0]?'on':''}" data-t="${t[0]}">${t[1]}</button>`).join('')}
+function explore(){
+if(sel!=null&&D[sel][0]==park)return detail(sel);
+const nr=nearest();
+let h=parkInfo()+`<input type="search" id="q" placeholder="Cari wahana, fasilitas, atau lokasi…" value="${q}"><div class="chips"><button class="chip ${cat?'':'on'}" data-c="">Semua</button>${Object.keys(C).map(k=>`<button class="chip ${cat==k?'on':''}" data-c="${k}">${C[k][1]} ${C[k][0]}</button>`).join('')}</div>`;
+if(nr.length)h+=`<div class="card"><b>📍 Wahana terdekat dari Anda</b><br>${nr.map(n=>`<span class="tag">${D[n[0]][1]} · ±${n[1]} m</span>`).join('')}</div>`;
+const L=idx().filter(i=>(!cat||D[i][2]==cat)&&(!q||D[i][1].toLowerCase().includes(q)));
+h+=L.map(i=>{const d=D[i],c=C[d[2]];return`<div class="item" style="--c:${c[2]}" data-i="${i}"><div class="em">${c[1]}</div><div><b>${d[1]}</b><span>${c[0]} · ${d[6].split(' · ')[0]}</span></div></div>`}).join('')||'<p class="mut">Tidak ada titik yang cocok.</p>';
+return h+`<p class="mut" style="font-size:11px">Nama wahana mengacu pada sumber publik; posisi titik di peta masih skematis, belum hasil survei lapangan.</p>`}
+function detail(i,qz){const d=D[i],c=C[d[2]],can=PT[d[2]],done=S.sc.includes(i);
+const sc=('🌲🌿'+c[1]+'🌳⛰️☁️🌲').repeat(4);
+let h=`<button class="btn l" data-back="1">← Kembali</button><div class="card" style="border-top:5px solid ${c[2]}"><div style="font-size:34px">${c[1]}</div><h2 style="margin:4px 0">${d[1]}</h2><span class="tag" style="background:${c[2]};color:#fff">${c[0]}</span><span class="tag">${PK[d[0]][0]}</span><p>${d[5]}</p><b>GEO-Info · Fasilitas</b><br>${d[6].split(' · ').map(f=>`<span class="tag">✔ ${f}</span>`).join('')}
+<div style="margin-top:10px"><b>GEO-Virtual · Tur 360°</b> <span class="mut">(simulasi)</span><div class="pano"><div id="pn">${sc}</div></div><input type="range" id="rg" min="0" max="100" value="0"></div>`;
+if(me)h+=`<p>📏 Jarak dari lokasi Anda: <b>±${dist(me,[d[3],d[4]])} m</b></p>`;
+if(qz)h+=`<div class="card" style="background:var(--bg)"><b>${Q[qz][0]}</b>${Q[qz][1].map((o,k)=>`<button class="btn l" style="display:block;width:100%;text-align:left" data-a="${k}" data-q="${qz}" data-i="${i}">${o}</button>`).join('')}</div>`;
+else if(can)h+=done?`<p>✅ Misi titik ini selesai.</p>`:`<button class="btn o" data-scan="${i}">📷 Scan QR &amp; jawab kuis (+${can} poin)</button>`;
+else h+=`<p class="mut">Titik ini tidak memiliki misi.</p>`;
+if(G[i])h+=`<p>📍 <b>${G[i][0]}, ${G[i][1]}</b> <span class="tag">koordinat nyata</span></p>`;if(routeStart(i)!=null)h+=`<button class="btn" data-route="${i}">🧭 Rute ke sini</button>`;if(rt&&rt[1]==i){const ri=routeInfo();h+=`<p>🧭 <b>${me?'Lokasi Anda → ':''}${D[rt[0]][1]} → ${d[1]}</b><br>±${ri.m} m · sekitar ${Math.max(1,Math.round(ri.m/80))} menit jalan kaki <button class="btn l" data-route="-1">✖ Hapus rute</button></p>`}
+return h+`</div>`}
+function quest(){const n=k=>S.sc.filter(i=>D[i][2]==k).length,t=k=>D.filter(d=>d[2]==k).length,nx=RW.find(r=>r[0]>S.pts);
+const M=[['WILDLIFE EXPLORER · +50 PTS','Scan QR di area satwa lalu jawab kuis.',n('sat')+'/'+t('sat'),'#3f9a63',n('sat')==t('sat')],['SCIENCE HUNTER · +30 PTS','Kuis singkat di wahana edukasi.',n('edu')+'/'+t('edu'),'#3b8f9a',n('edu')==t('edu')],['ADVENTURE SEEKER · +100 PTS','Kunjungi 5 titik berbeda di peta.',Math.min(5,S.sc.length)+'/5','#e8a23a',S.adv],['CONSERVATION HERO · +75 PTS','Selesaikan tantangan edukasi konservasi.',S.con?'1/1':'0/1','#d9694f',S.con]];
+return`<div class="pts"><span style="opacity:.8">Poin kamu</span><br><big>${S.pts}</big> <b>PTS</b><div class="bar"><i style="width:${Math.min(100,S.pts/7.5)}%"></i></div><small>${nx?`${nx[0]-S.pts} poin lagi untuk ${nx[1]}`:'Semua hadiah terbuka! 🎉'}</small></div>`+M.map(m=>`<div class="card ms ${m[4]?'done':''}" style="--c:${m[3]}"><b>${m[0]}</b><br><span class="mut">${m[1]}</span><br><b>${m[4]?'✅ Selesai':'Progres '+m[2]}</b></div>`).join('')+`<button class="btn o" data-con="1" ${S.con?'disabled':''}>🌿 Kuis Konservasi (+75)</button><button class="btn l" data-reset="1">Reset progres</button><p class="mut" style="font-size:11px">Misi aman: satwa hanya diamati dari area pengunjung. Satu titik hanya dapat diklaim sekali (anti-abuse).</p>`}
+function rewards(){return`<div class="pts"><span style="opacity:.8">Reward Center</span><br><big>${S.pts}</big> <b>PTS</b></div>`+RW.map((r,k)=>`<div class="item" style="--c:#f59e0b;cursor:default"><div class="em">${r[2]}</div><div style="flex:1"><b>${r[1]}</b><span>${r[0]} poin</span></div><button class="btn" data-rd="${k}" ${S.pts<r[0]?'disabled':''}>Tukar</button></div>`).join('')+(S.red.length?`<div class="card"><b>Riwayat penukaran</b><br>${S.red.map(x=>`<span class="tag">${x}</span>`).join('')}<p class="mut" style="font-size:11px">Tunjukkan kode ke petugas Reward Center.</p></div>`:'')}
+function pane(){const p=$('pane'),sc=p.scrollTop;p.innerHTML=tab=='x'?explore():tab=='q'?quest():tab=='d'?dash():rewards();p.scrollTop=sc;
+const rg=$('rg');if(rg)rg.oninput=()=>$('pn').style.transform=`translateX(-${rg.value*3.2}px)`;
+const qi=$('q');if(qi)qi.oninput=()=>{q=qi.value.trim().toLowerCase();pane();draw();$('q').focus();const l=$('q').value.length;$('q').setSelectionRange(l,l)}}
+function all(){parks();tabs();pane();draw()}
+function award(i){const p=PT[D[i][2]];S.sc.push(i);S.pts+=p;let m=`+${p} poin! 🎉`;if(S.sc.length>=5&&!S.adv){S.adv=1;S.pts+=100;m+=' Bonus Adventure Seeker +100!'}sv();toast(m)}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-p],[data-t],[data-c],.item[data-i],[data-back],[data-scan],[data-a],[data-con],[data-rd],[data-reset],[data-route],[data-heat],[data-imp],[data-gr]');if(!t)return;const D_=t.dataset;
+if(D_.p){park=+D_.p;sel=null;rt=null;cat=null;q='';me=null;all();fit()}
+else if(D_.t){tab=D_.t;pane();tabs()}
+else if(D_.c!==undefined&&t.classList.contains('chip')){cat=D_.c||null;pane();draw()}
+else if(t.classList.contains('item')&&D_.i!==undefined)sel_(+D_.i,1);
+else if(D_.back){sel=null;all()}
+else if(D_.scan){const i=+D_.scan;$('pane').innerHTML=detail(i,D[i][2]=='sat'?'sat':'edu');const rg=$('rg');if(rg)rg.oninput=()=>$('pn').style.transform=`translateX(-${rg.value*3.2}px)`}
+else if(D_.a!==undefined){if(+D_.a===0){const i=+D_.i;if(D_.q=='con'){S.con=1;S.pts+=75;sv();toast('+75 poin! Conservation Hero 🌿');tab='q';all()}else{award(i);all()}}else toast('Belum tepat, coba lagi 🙂')}
+else if(D_.con){$('pane').innerHTML=`<button class="btn l" data-t="q">← Kembali</button><div class="card"><b>${Q.con[0]}</b>${Q.con[1].map((o,k)=>`<button class="btn l" style="display:block;width:100%;text-align:left" data-a="${k}" data-q="con" data-i="0">${o}</button>`).join('')}</div>`}
+else if(D_.rd){const r=RW[+D_.rd];if(S.pts>=r[0]){S.pts-=r[0];const c='GP-'+Math.random().toString(36).slice(2,6).toUpperCase();S.red.push(r[1]+' · '+c);sv();toast('Kode penukaran: '+c);pane()}}
+else if(D_.imp){const n=impG($('imp').value);toast(n?n+' titik diperbarui · titik lain masih skematis':'Tidak ada baris yang cocok. Format: Nama | lat, lon');if(n){rt=null;all();fit()}}else if(D_.gr){Object.keys(G).forEach(k=>delete G[k]);D.forEach((d,i)=>{d[3]=D0[i][0];d[4]=D0[i][1]});saveG();rt=null;all();fit();toast('Koordinat direset ke posisi skematis')}else if(D_.route){const i=+D_.route;rt=i<0?null:[routeStart(i),i];if(i>=0)fly(i);all()}else if(D_.heat){heat=!heat;pane();draw()}else if(D_.reset){S={pts:0,sc:[],adv:0,con:0,red:[]};sv();all()}});
+// pan, zoom, klik peta
+let dr=null;
+svg.addEventListener('pointerdown',e=>{dr={x:e.clientX,y:e.clientY,vx:vb.x,vy:vb.y,mv:0};svg.setPointerCapture(e.pointerId)});
+svg.addEventListener('pointermove',e=>{if(!dr)return;const r=svg.getBoundingClientRect(),dx=e.clientX-dr.x,dy=e.clientY-dr.y;if(Math.hypot(dx,dy)>5)dr.mv=1;if(dr.mv){vb.x=dr.vx-dx/r.width*vb.w;vb.y=dr.vy-dy/r.height*vb.h;ap()}});
+svg.addEventListener('pointerup',e=>{if(dr&&!dr.mv){const g=document.elementFromPoint(e.clientX,e.clientY)?.closest('.mk');if(placing){me=pt(e);placing=false;$('loc').classList.remove('on');$('hint').textContent='Lokasi diset · wahana terdekat ditandai';tab='x';all()}else if(g)sel_(+g.dataset.i,0)}dr=null});
+svg.addEventListener('wheel',e=>{e.preventDefault();const p=pt(e);zoom(e.deltaY>0?1.15:.87,p[0],p[1])},{passive:false});
+$('zi').onclick=()=>zoom(.75);$('zo').onclick=()=>zoom(1.33);$('rs').onclick=fit;$('sty').onclick=()=>{sty=(sty+1)%3;$('sty').classList.toggle('on',sty==1);$('hint').textContent=['Gaya: ilustrasi taman','Gaya: citra satelit (simulasi)','Gaya: peta game'][sty];draw()};
+$('loc').onclick=()=>{placing=!placing;$('loc').classList.toggle('on',placing);$('hint').textContent=placing?'Ketuk peta untuk menandai posisi Anda':'Geser & zoom peta · ketuk titik untuk detail'};
+addEventListener('resize',fit);loadG();all();fit();
+</script></body></html>
